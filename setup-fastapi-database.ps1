@@ -109,7 +109,7 @@ async def get_database(db: AsyncIOMotorDatabase = Depends(get_db)) -> AsyncIOMot
 '@
 
 
-$fastapi_init_db_content =  'from app.models.user import User'
+$fastapi_init_db_content = 'from app.models.user import User'
 
 
 $fastapi_user_model_content = @'
@@ -444,7 +444,8 @@ function fastapi_database_update_config {
 
         Set-Content -Path $ConfigPath -Value $updatedContent -Encoding UTF8
         Write-Host "Database configuration added successfully!"
-    } else {
+    }
+    else {
         Write-Host "Database configuration already exists. Skipping..."
     }
 }
@@ -470,9 +471,9 @@ function fastapi_update_Core_config {
     $driver = $db_driver.ToLower()
 
     switch ($driver) {
-        "mongodb"   { $connection = "mongodb://" }
+        "mongodb" { $connection = "mongodb://" }
         "postgresql" { $connection = "postgresql+psycopg2://" }
-        default      { $connection = "mysql+pymysql://" }
+        default { $connection = "mysql+pymysql://" }
     }
 
     $db_url_block = @"
@@ -530,14 +531,16 @@ function fastapi_update_api_router {
             $content = [regex]::Replace($content, $importPattern, $newImports)
             Write-Host "'user' import added to $routerFile"
         }
-    } else {
+    }
+    else {
         $content = "from app.api.v1.endpoints import user`n" + $content
         Write-Host "'user' import added at the top of $routerFile"
     }
 
     if ($content -match [regex]::Escape($newLine)) {
         Write-Host "The route already exists in $routerFile. Nothing was added."
-    } else {
+    }
+    else {
         $lines = $content -split "`r?`n"
         $lastIndex = -1
         for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -547,7 +550,8 @@ function fastapi_update_api_router {
         }
         if ($lastIndex -ge 0) {
             $lines = $lines[0..$lastIndex] + $newLine + $lines[($lastIndex + 1)..($lines.Count - 1)]
-        } else {
+        }
+        else {
             $lines += $newLine
         }
         $content = $lines -join "`n"
@@ -578,7 +582,8 @@ function fastapi_update_env_files {
             if ($content -notmatch $pattern) {
                 Add-Content -Path $envfile -Value "$key=$($Variables[$key])"
                 Write-Host "Added $key to $envfile"
-            } else {
+            }
+            else {
                 Write-Host "$key already exists in $envfile, skipping"
             }
         }
@@ -594,11 +599,11 @@ function fastapi_pymysql {
     fastapi_update_Core_config -db_driver "mysql"
 
     $database_mysql_var = @{
-        "DB_HOST" = "localhost"
-        "DB_PORT" = "3306"
-        "DB_USER" = "root"
+        "DB_HOST"     = "localhost"
+        "DB_PORT"     = "3306"
+        "DB_USER"     = "root"
         "DB_PASSWORD" = "password"
-        "DB_NAME" = "mydb"
+        "DB_NAME"     = "mydb"
     }
     fastapi_update_env_files -Variables $database_mysql_var
     Set-Content "app/models/user.py" -Value $fastapi_user_model_content -Encoding UTF8
@@ -613,11 +618,11 @@ function fastapi_psycopg2Binary {
     fastapi_update_Core_config -db_driver "postgresql"
 
     $database_postgresql_var = @{
-        "DB_HOST" = "localhost"
-        "DB_PORT" = "5432"
-        "DB_USER" = "postgres"
+        "DB_HOST"     = "localhost"
+        "DB_PORT"     = "5432"
+        "DB_USER"     = "postgres"
         "DB_PASSWORD" = "password"
-        "DB_NAME" = "mydb"
+        "DB_NAME"     = "mydb"
     }
     fastapi_update_env_files -Variables $database_postgresql_var
     Set-Content "app/models/user.py" -Value $fastapi_user_model_content -Encoding UTF8
@@ -632,11 +637,11 @@ function fastapi_pymongo {
     fastapi_update_Core_config -db_driver "mongodb"
 
     $database_mongos_var = @{
-        "DB_HOST" = "localhost"
-        "DB_PORT" = "27017"
-        "DB_USER" = "mongo_user"
+        "DB_HOST"     = "localhost"
+        "DB_PORT"     = "27017"
+        "DB_USER"     = "mongo_user"
         "DB_PASSWORD" = "password"
-        "DB_NAME" = "mydb"
+        "DB_NAME"     = "mydb"
     }
     fastapi_update_env_files -Variables $database_mongos_var
     Set-Content "app/models/user.py" -Value $fastapi_user_model_mongos_content -Encoding UTF8
@@ -704,7 +709,8 @@ function Fastapi-Database {
         Set-Content "app/database/deps.py" -Value $fastapi_deps_mongos_content -Encoding UTF8
         Set-Content "app/repositories/user_repository.py" -Value $fastapi_user_repository_mongos_content -Encoding UTF8
         Set-Content "app/services/user_service.py" -Value $fastapi_user_service_mongos_content -Encoding UTF8
-    } else {
+    }
+    else {
         Set-Content "app/api/v1/endpoints/user.py" -Value $fastapi_user_endpoint_content -Encoding UTF8
         Set-Content "app/database/base.py" -Value $fastapi_base_content -Encoding UTF8
         Set-Content "app/database/session.py" -Value $fastapi_session_content -Encoding UTF8

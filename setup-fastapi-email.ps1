@@ -128,20 +128,21 @@ function Fastapi-Email {
 
         Set-Content -Path $ConfigPath -Value $updatedContent -Encoding UTF8
         Write-Host "Email configuration added successfully!"
-    } else {
+    }
+    else {
         Write-Host "Email configuration already exists. Skipping..."
     }
 
     $EnvFiles = @(".env", ".env.example")
 
     $Variables = @{
-        "MAIL_HOST" = "smtp.gmail.com"
-        "MAIL_PORT" = "587"
-        "MAIL_USERNAME" = "your@email.com"
-        "MAIL_PASSWORD" = "your_password"
-        "MAIL_FROM" = "your@email.com"
+        "MAIL_HOST"      = "smtp.gmail.com"
+        "MAIL_PORT"      = "587"
+        "MAIL_USERNAME"  = "your@email.com"
+        "MAIL_PASSWORD"  = "your_password"
+        "MAIL_FROM"      = "your@email.com"
         "MAIL_FROM_NAME" = "Your App"
-        "MAIL_TLS" = "true"
+        "MAIL_TLS"       = "true"
     }
 
     foreach ($envfile in $EnvFiles) {
@@ -157,7 +158,8 @@ function Fastapi-Email {
             if ($content -notmatch $pattern) {
                 Add-Content -Path $envfile -Value "$key=$($Variables[$key])"
                 Write-Host "Added $key to $envfile"
-            } else {
+            }
+            else {
                 Write-Host "$key already exists in $envfile, skipping"
             }
         }
