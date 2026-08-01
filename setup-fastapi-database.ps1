@@ -51,19 +51,19 @@ class BaseModelMongo(BaseModel):
 
 
 $fastapi_session_content = @'
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.core.config import settings
 
-engine = create_engine(
+engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=settings.debug
+    echo=settings.debug,
 )
 
-SessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     autoflush=False,
-    autocommit=False
+    autocommit=False,
+    expire_on_commit=False,
 )
 '@
 
@@ -88,14 +88,16 @@ async def get_db() -> AsyncIOMotorDatabase:
 
 
 $fastapi_deps_content = @'
-from app.database.session import SessionLocal
+from typing import AsyncGenerator
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.session import AsyncSessionLocal
+
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
 '@
 
 
@@ -143,33 +145,35 @@ class User(BaseModel):
 
 
 $fastapi_user_repository_content = @'
-from sqlalchemy.orm import Session
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.user import User
 
+
 class UserRepository:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def create(self, name: str, email: str) -> User:
+    async def create(self, name: str, email: str) -> User:
         user = User(name=name, email=email)
         self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
         return user
 
-    def get_by_id(self, user_id: int) -> User | None:
-        return self.db.query(User).filter(User.id == user_id).first()
+    async def get_by_id(self, user_id: int) -> User | None:
+        result = await self.db.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
 
-    def get_all(self) -> list[User]:
-        return self.db.query(User).all()
+    async def get_all(self) -> list[User]:
+        result = await self.db.execute(select(User))
+        return list(result.scalars().all())
 
-    def delete(self, user_id: int) -> bool:
-        user = self.get_by_id(user_id)
-        if user:
-            self.db.delete(user)
-            self.db.commit()
-            return True
-        return False
+    async def delete(self, user_id: int) -> bool:
+        result = await self.db.execute(delete(User).where(User.id == user_id))
+        await self.db.commit()
+        return result.rowcount > 0
 '@
 
 $fastapi_user_repository_mongos_content = @'
@@ -221,23 +225,27 @@ class UserRead(BaseModel):
 
 
 $fastapi_user_service_content = @'
+from typing import Optional
+
+from app.models.user import User
 from app.repositories.user_repository import UserRepository
+
 
 class UserService:
     def __init__(self, repo: UserRepository):
         self.repo = repo
 
-    def create_user(self, name: str, email: str):
-        return self.repo.create(name, email)
+    async def create_user(self, name: str, email: str) -> User:
+        return await self.repo.create(name, email)
 
-    def get_user(self, user_id: int):
-        return self.repo.get_by_id(user_id)
+    async def get_user(self, user_id: int) -> Optional[User]:
+        return await self.repo.get_by_id(user_id)
 
-    def list_users(self):
-        return self.repo.get_all()
+    async def list_users(self) -> list[User]:
+        return await self.repo.get_all()
 
-    def delete_user(self, user_id: int):
-        return self.repo.delete(user_id)
+    async def delete_user(self, user_id: int) -> bool:
+        return await self.repo.delete(user_id)
 '@
 
 
@@ -266,40 +274,41 @@ class UserService:
 
 $fastapi_user_endpoint_content = @'
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database.deps import get_db
-from app.services.user_service import UserService
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserRead
+from app.services.user_service import UserService
 
 router = APIRouter()
 
+
+async def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
+    return UserService(UserRepository(db))
+
+
 @router.post("/", response_model=UserRead)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    repo = UserRepository(db)
-    service = UserService(repo)
-    return service.create_user(user.name, user.email)
+async def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
+    return await service.create_user(user.name, user.email)
+
 
 @router.get("/{user_id}", response_model=UserRead)
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    repo = UserRepository(db)
-    service = UserService(repo)
-    user = service.get_user(user_id)
+async def get_user(user_id: int, service: UserService = Depends(get_user_service)):
+    user = await service.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 @router.get("/", response_model=list[UserRead])
-def list_users(db: Session = Depends(get_db)):
-    repo = UserRepository(db)
-    service = UserService(repo)
-    return service.list_users()
+async def list_users(service: UserService = Depends(get_user_service)):
+    return await service.list_users()
+
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    repo = UserRepository(db)
-    service = UserService(repo)
-    success = service.delete_user(user_id)
+async def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
+    success = await service.delete_user(user_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted"}
@@ -345,23 +354,26 @@ async def delete_user(user_id: str, service: UserService = Depends(get_user_serv
 
 
 $fastapi_alembic_env_content = @'
-from app.models import *
-from app.core.config import settings
-from app.database.base import Base
+import asyncio
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
 
 from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from app.core.config import settings
+from app.database.base import Base
+from app.models import *  # noqa: F401,F403
 
 config = context.config
-
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
 target_metadata = Base.metadata
+
 
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
@@ -376,20 +388,28 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    connectable = engine_from_config(
+def do_run_migrations(connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
+
+
+def run_migrations_online() -> None:
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
@@ -472,8 +492,8 @@ function fastapi_update_Core_config {
 
     switch ($driver) {
         "mongodb" { $connection = "mongodb://" }
-        "postgresql" { $connection = "postgresql+psycopg2://" }
-        default { $connection = "mysql+pymysql://" }
+        "postgresql" { $connection = "postgresql+asyncpg://" }
+        default { $connection = "mysql+aiomysql://" }
     }
 
     $db_url_block = @"
@@ -593,7 +613,7 @@ function fastapi_update_env_files {
 
 function fastapi_pymysql {
     Write-Host "Installing dependencies..."
-    pip install alembic sqlalchemy pymysql "pydantic[email]"
+    pip install alembic "sqlalchemy[asyncio]" aiomysql "pydantic[email]"
     pip freeze > requirements.txt
 
     fastapi_update_Core_config -db_driver "mysql"
@@ -612,7 +632,7 @@ function fastapi_pymysql {
 
 function fastapi_psycopg2Binary {
     Write-Host "Installing dependencies"
-    pip install alembic sqlalchemy psycopg2-binary "pydantic[email]"
+    pip install alembic "sqlalchemy[asyncio]" asyncpg "pydantic[email]"
     pip freeze > requirements.txt
 
     fastapi_update_Core_config -db_driver "postgresql"

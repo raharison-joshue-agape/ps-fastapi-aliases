@@ -87,12 +87,13 @@ from fastapi import APIRouter
 router = APIRouter()
 
 @router.get("/")
-def health_check():
+async def health_check():
     return {"status": "ok"}
 '@
 
 
 $fastapi_main_content = @'
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -100,10 +101,17 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.api.v1.router import api_router
 from app.core.config import settings
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
-    debug=settings.debug
+    debug=settings.debug,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -126,13 +134,16 @@ app.include_router(api_router, prefix="/api/v1")
 
 
 $fastapi_test_content = @'
-from fastapi.testclient import TestClient
+import pytest
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 
-client = TestClient(app)
 
-def test_health_check():
-    response = client.get("/api/v1/health/")
+@pytest.mark.anyio
+async def test_health_check():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/api/v1/health/")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 '@
@@ -218,7 +229,7 @@ function New-Fastapi {
     python -m pip install --upgrade pip
 
     Write-Host "🔹 Installing dependencies..."
-    pip install fastapi uvicorn pydantic pydantic-settings pytest httpx itsdangerous
+    pip install fastapi uvicorn pydantic pydantic-settings pytest httpx anyio itsdangerous
     pip freeze > requirements.txt
 
     $dirs = @(
