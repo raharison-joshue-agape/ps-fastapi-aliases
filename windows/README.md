@@ -82,6 +82,7 @@ Each module groups functions by topic:
 | `create-fastapi-project.ps1` | `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
 | `setup-fastapi-database.ps1` | `Fastapi-Database`, `Setup-Fastapi-Database` |
 | `setup-fastapi-email.ps1` | `Fastapi-Email`, `Setup-Fastapi-Mail` |
+| `setup-fastapi-upload.ps1` | `Fastapi-Upload`, `Setup-Fastapi-Upload` |
 
 ## Usage
 
@@ -117,6 +118,14 @@ Fastapi-Email
 ```
 
 Installs `aiosmtplib` and `Jinja2`, creates the template folders, and generates an async `EmailService` plus the required `MAIL_*` settings.
+
+### File upload setup
+
+```powershell
+Fastapi-Upload
+```
+
+Installs `python-multipart` and `aiofiles`, creates the storage tree (`app/uploads/images`, `app/uploads/documents`), and generates an async `UploadService` with extension/size validation, schemas, and `POST`/`DELETE` endpoints. Uploaded files are served statically from `/uploads`.
 
 ## Built-in help
 

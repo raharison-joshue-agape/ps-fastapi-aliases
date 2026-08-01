@@ -533,7 +533,8 @@ function fastapi_update_api_router {
         [Parameter(Mandatory = $true)]
         [string]$routerFile,
         [Parameter(Mandatory = $true)]
-        [string]$newLine
+        [string]$newLine,
+        [string]$ModuleName = "user"
     )
 
     if (-not (Test-Path $routerFile)) {
@@ -546,15 +547,15 @@ function fastapi_update_api_router {
     $importPattern = "from app\.api\.v1\.endpoints import (.+)"
     if ($content -match $importPattern) {
         $currentImports = $Matches[1].Trim()
-        if ($currentImports -notmatch "\buser\b") {
-            $newImports = "from app.api.v1.endpoints import $currentImports, user"
+        if ($currentImports -notmatch "\b$ModuleName\b") {
+            $newImports = "from app.api.v1.endpoints import $currentImports, $ModuleName"
             $content = [regex]::Replace($content, $importPattern, $newImports)
-            Write-Host "'user' import added to $routerFile"
+            Write-Host "'$ModuleName' import added to $routerFile"
         }
     }
     else {
-        $content = "from app.api.v1.endpoints import user`n" + $content
-        Write-Host "'user' import added at the top of $routerFile"
+        $content = "from app.api.v1.endpoints import $ModuleName`n" + $content
+        Write-Host "'$ModuleName' import added at the top of $routerFile"
     }
 
     if ($content -match [regex]::Escape($newLine)) {
