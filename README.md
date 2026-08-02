@@ -4,7 +4,7 @@
 
 ### Des raccourcis CLI pour scaffold des projets **FastAPI** complets et **100 % asynchrones** en quelques secondes
 
-Un ensemble de fonctions pour **Bash (Linux)** et **PowerShell (Windows)** qui génèrent une base de code FastAPI moderne, structurée et prête à l'emploi — sans perdre de temps à tout recréer à chaque projet.
+Un ensemble de fonctions pour **Bash (Linux/macOS)** et **PowerShell (Windows)** qui génèrent une base de code FastAPI moderne, structurée et prête à l'emploi — sans perdre de temps à tout recréer à chaque projet.
 
 ---
 
@@ -19,6 +19,7 @@ Un ensemble de fonctions pour **Bash (Linux)** et **PowerShell (Windows)** qui g
 [![Bash](https://img.shields.io/badge/Bash-4.0%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell/)
 [![Linux](https://img.shields.io/badge/Linux-ready-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://www.linux.org/)
+[![macOS](https://img.shields.io/badge/macOS-ready-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Windows](https://img.shields.io/badge/Windows-ready-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 
 </div>
@@ -31,6 +32,7 @@ Un ensemble de fonctions pour **Bash (Linux)** et **PowerShell (Windows)** qui g
 - [⚡ Démarrage rapide](#-démarrage-rapide)
 - [🧰 Prérequis](#-prérequis)
 - [🐧 Installation Linux](#-installation-linux)
+- [🍎 Installation macOS](#-installation-macos)
 - [🪟 Installation Windows](#-installation-windows)
 - [🔧 Référence des commandes](#-référence-des-commandes)
 - [🧩 Architecture et modules](#-architecture-et-modules)
@@ -54,6 +56,7 @@ Un ensemble de fonctions pour **Bash (Linux)** et **PowerShell (Windows)** qui g
 | 📁 **Uploads de fichiers** | Service asynchrone (images, documents) avec validation taille/extension et serveur statique `/uploads` |
 | 🧩 **Architecture modulaire** | Modules thématiques (projet, base de données, email, uploads) chargés depuis un point d'entrée unique |
 | 🧠 **Multi-plateforme** | Mêmes commandes, mêmes options, mêmes templates : `new_fastapi` ⇄ `New-Fastapi` |
+| 🍎 **macOS / Bash** | Scripts `.sh` compatibles bash 3.2+ intégré (et zsh) + outils BSD |
 | ✅ **Feedback clair** | Messages de progression et de succès à chaque étape de l'installation |
 
 ---
@@ -65,6 +68,11 @@ Un ensemble de fonctions pour **Bash (Linux)** et **PowerShell (Windows)** qui g
 ```bash
 # Linux — ajouter à ~/.bashrc
 . ~/.config/alias/fastapi-aliases-project/linux/index.sh
+```
+
+```bash
+# macOS — ajouter à ~/.zshrc (ou ~/.bash_profile)
+. ~/.config/alias/fastapi-aliases-project/macos/index.sh
 ```
 
 ```powershell
@@ -88,6 +96,7 @@ uvicorn app.main:app --reload   # → http://127.0.0.1:8000/docs
 | **Python** | 3.9+ avec `venv` et `pip` disponibles dans le `PATH` |
 | **Git** | Installé et accessible (pour l'initialisation optionnelle du projet) |
 | **Linux** | bash 4.0+ (ou zsh) |
+| **macOS** | bash 3.2+ intégré ou zsh (shell par défaut) |
 | **Windows** | Windows 10/11, Windows PowerShell 5.1+ ou PowerShell 7 |
 | **Base de données** *(optionnel)* | MySQL/MariaDB, PostgreSQL ou MongoDB |
 
@@ -130,6 +139,48 @@ new_fastapi myapp
 cd myapp && source venv/bin/activate
 uvicorn app.main:app --reload
 ```
+
+---
+
+## 🍎 Installation macOS
+
+### 1. Copier les fichiers dans votre répertoire de configuration
+
+```bash
+mkdir -p ~/.config/alias
+cp -r macos ~/.config/alias/fastapi-aliases-project/
+```
+
+### 2. Ouvrir votre fichier de configuration shell
+
+```bash
+nano ~/.zshrc          # Zsh (shell par défaut de macOS)
+nano ~/.bash_profile   # Bash
+```
+
+### 3. Importer les aliases
+
+Ajoutez cette ligne à la fin du fichier :
+
+```bash
+. ~/.config/alias/fastapi-aliases-project/macos/index.sh
+```
+
+### 4. Recharger votre configuration
+
+```bash
+source ~/.zshrc        # ou : source ~/.bash_profile
+```
+
+### 5. Créer votre premier projet
+
+```bash
+new_fastapi myapp
+cd myapp && source venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+> 💡 Les scripts sont compatibles avec le **bash 3.2 embarqué** de macOS (aucune dépendance bash 4+ ni outil GNU) et fonctionnent sous **zsh**.
 
 ---
 
@@ -188,12 +239,12 @@ uvicorn app.main:app --reload
 
 ## 🔧 Référence des commandes
 
-Les fonctions se comportent comme des commandes natives et acceptent les mêmes arguments sur les deux plateformes.
+Les fonctions se comportent comme des commandes natives et acceptent les mêmes arguments sur les trois plateformes.
 
 ### 🚀 Créer un projet
 
 ```bash
-# Linux (Bash)
+# Linux / macOS (Bash)
 new_fastapi myapp
 new_fastapi_project myapp
 create_fastapi myapp
@@ -230,7 +281,7 @@ myapp/
 ### 🗄️ Configurer la base de données
 
 ```bash
-# Linux
+# Linux / macOS
 fastapi_database
 # Windows
 Fastapi-Database
@@ -247,7 +298,7 @@ Génère la couche complète : `session.py` (`create_async_engine`, `AsyncSessio
 ### 📧 Configurer le service email
 
 ```bash
-# Linux
+# Linux / macOS
 fastapi_email
 # Windows
 Fastapi-Email
@@ -282,7 +333,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/email/send \
 ### 📁 Configurer les uploads de fichiers
 
 ```bash
-# Linux
+# Linux / macOS
 fastapi_upload
 # Windows
 Fastapi-Upload
@@ -306,7 +357,7 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
 
 ```
  Terminal / Shell de l'utilisateur
-      │      (~/.bashrc | $PROFILE)
+      │      (~/.bashrc | ~/.zshrc | $PROFILE)
       ▼
 ┌────────────────────────────┐
 │    index.sh / index.ps1    │  Point d'entrée — charge tous les modules
@@ -331,14 +382,16 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
 - **`index.sh` / `index.ps1`** : source l'ensemble des modules situés dans son propre répertoire, quel que soit l'endroit où le projet a été copié.
 - **Modules thématiques** : chacun expose les fonctions publiques d'un domaine (projet, base de données, email, uploads).
 - **Helpers partagés** : portent la logique transversale (mise à jour du router, des `.env`, de la config).
-- Les deux implémentations (`linux/` et `windows/`) sont **fonctionnellement équivalentes** : mêmes commandes, mêmes options, mêmes templates générés.
+- Les trois implémentations (`linux/`, `macos/` et `windows/`) sont **fonctionnellement équivalentes** : mêmes commandes, mêmes options, mêmes templates générés.
 
-| Fichier (Linux / Windows) | Fonctions |
+| Fichier (Linux / macOS / Windows) | Fonctions |
 |---|---|
 | `create-fastapi-project.sh` / `.ps1` | `new_fastapi`, `new_fastapi_project`, `create_fastapi`, `create_fastapi_project` / `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
 | `setup-fastapi-database.sh` / `.ps1` | `fastapi_database`, `setup_fastapi_database` / `Fastapi-Database`, `Setup-Fastapi-Database` |
 | `setup-fastapi-email.sh` / `.ps1` | `fastapi_email`, `setup_fastapi_mail` / `Fastapi-Email`, `Setup-Fastapi-Mail` |
 | `setup-fastapi-upload.sh` / `.ps1` | `fastapi_upload`, `setup_fastapi_upload` / `Fastapi-Upload`, `Setup-Fastapi-Upload` |
+
+> 💡 **macOS** expose les **mêmes noms de fonctions que Linux** (scripts `.sh`) — seule l'installation diffère (`~/.zshrc` / `~/.bash_profile`).
 
 ---
 
@@ -353,6 +406,13 @@ fastapi-aliases-project/
 │   ├── setup-fastapi-email.sh       # fastapi_email (aiosmtplib + Jinja2)
 │   ├── setup-fastapi-upload.sh      # fastapi_upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation Linux
+├── macos/                    # Implémentation Bash pour macOS (zsh/bash 3.2+)
+│   ├── index.sh              # Point d'entrée (charge tous les modules)
+│   ├── create-fastapi-project.sh    # new_fastapi, create_fastapi, ...
+│   ├── setup-fastapi-database.sh    # fastapi_database (SQLAlchemy async / motor)
+│   ├── setup-fastapi-email.sh       # fastapi_email (aiosmtplib + Jinja2)
+│   ├── setup-fastapi-upload.sh      # fastapi_upload (aiofiles + /uploads)
+│   └── README.md             # Guide d'installation macOS
 ├── windows/                  # Implémentation PowerShell pour Windows
 │   ├── index.ps1             # Point d'entrée (charge tous les modules)
 │   ├── create-fastapi-project.ps1   # New-Fastapi, Create-Fastapi, ...
@@ -369,13 +429,13 @@ fastapi-aliases-project/
 
 Chaque fonction dispose d'une documentation intégrée, découvrable directement dans votre shell :
 
-| Commande (Linux) | Commande (Windows) | Description |
+| Commande (Linux / macOS) | Commande (Windows) | Description |
 |---|---|---|
 | `type <fonction>` | `Get-Help <fonction>` | Affiche la définition / documentation d'une fonction |
 | `declare -f <fonction>` | `Get-Command <fonction>` | Détails d'implémentation |
 
 ```bash
-# Linux
+# Linux / macOS
 type new_fastapi
 declare -f fastapi_database
 ```
@@ -399,6 +459,15 @@ Get-Command Fastapi-Database
 rm -rf ~/.config/alias/fastapi-aliases-project
 ```
 
+### macOS
+
+1. Supprimez la ligne d'import de `~/.zshrc` (ou `~/.bash_profile`).
+2. Supprimez le répertoire :
+
+```bash
+rm -rf ~/.config/alias/fastapi-aliases-project
+```
+
 ### Windows
 
 1. Supprimez la ligne d'import de `$PROFILE`.
@@ -414,11 +483,11 @@ Remove-Item -Path "$HOME\.config\alias\fastapi-aliases-project" -Recurse -Force
 
 | Symptôme | Solution |
 |---|---|
-| Les fonctions ne fonctionnent pas | Vérifiez le chemin dans la ligne d'import, puis rechargez : `source ~/.bashrc` (Linux) ou `. $PROFILE` (Windows) |
+| Les fonctions ne fonctionnent pas | Vérifiez le chemin dans la ligne d'import, puis rechargez : `source ~/.bashrc` (Linux) · `source ~/.zshrc` (macOS) · `. $PROFILE` (Windows) |
 | `command not found: new_fastapi` / `Get-Help` ne retourne rien | Les fonctions ne sont pas chargées : confirmez la présence de la ligne d'import correspondant à votre plateforme dans votre fichier de configuration |
-| `python3: command not found` | Installez Python 3.9+ et assurez-vous qu'il est disponible dans le `PATH` |
-| `venv` ne se crée pas | Sous Debian/Ubuntu : `sudo apt install python3-venv` |
-| `Module not found: ...` | Un fichier de module est absent — réinstallez le dossier `linux/` ou `windows/` en entier |
+| `python3: command not found` | Installez Python 3.9+ et assurez-vous qu'il est disponible dans le `PATH` — macOS : `brew install python` |
+| `venv` ne se crée pas | Sous Debian/Ubuntu : `sudo apt install python3-venv` · macOS : activez Xcode Command Line Tools |
+| `Module not found: ...` | Un fichier de module est absent — réinstallez le dossier `linux/`, `macos/` ou `windows/` en entier |
 | `aiomysql` / `asyncpg` indisponibles | Vérifiez que votre base de données est démarrée et que les credentials dans `.env` sont corrects |
 | Uvicorn ne démarre pas | Confirmez que l'environnement virtuel est activé et que les dépendances sont installées (`pip install -r requirements.txt`) |
 
@@ -429,7 +498,7 @@ Remove-Item -Path "$HOME\.config\alias\fastapi-aliases-project" -Recurse -Force
 Les contributions sont les bienvenues ! Pour contribuer :
 
 1. **Fork** le dépôt et créez une branche : `git checkout -b feature/ma-fonctionnalite`
-2. **Implémentez** votre changement en respectant l'équivalence Linux/Windows existante
+2. **Implémentez** votre changement en respectant l'équivalence Linux/macOS/Windows existante
 3. **Testez** vos scripts avant de soumettre
 4. **Ouvrez une pull request** avec une description claire de vos modifications
 
