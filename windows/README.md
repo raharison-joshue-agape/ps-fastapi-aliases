@@ -1,160 +1,217 @@
-# FastAPI Project Aliases — Windows
+<div align="center">
 
-A curated collection of FastAPI scaffolding shortcuts that wrap everyday project setup operations for PowerShell on Windows.
+# ⚡ FastAPI Project Aliases — Windows
 
-## Overview
+### Scaffold des projets **FastAPI** asynchrones et complets directement depuis **PowerShell**
 
-Instead of typing long, repetitive setup commands, you use short, memorable functions that scaffold a complete, asynchronous FastAPI project in seconds:
+Des fonctions courtes et mémorisables qui remplacent les longues séquences de configuration par une seule commande.
+
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell/)
+[![Windows](https://img.shields.io/badge/Windows-ready-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+
+</div>
+
+---
+
+## 📑 Table des matières
+
+- [✨ Aperçu](#-aperçu)
+- [🧰 Prérequis](#-prérequis)
+- [📦 Installation](#-installation)
+- [🚀 Utilisation](#-utilisation)
+- [📖 Aide intégrée](#-aide-intégrée)
+- [🧹 Désinstallation](#-désinstallation)
+- [🛟 Dépannage](#-dépannage)
+- [🤝 Contribution](#-contribution)
+
+---
+
+## ✨ Aperçu
+
+Au lieu de taper de longues commandes de configuration répétitives, vous utilisez des fonctions courtes qui scaffoldent un projet FastAPI complet et **100 % asynchrone** en quelques secondes :
 
 ```powershell
-New-Fastapi myapp        # scaffold a complete async FastAPI project
-Fastapi-Database         # configure MySQL, PostgreSQL or MongoDB
-Fastapi-Email            # wire up an async email service (aiosmtplib)
+New-Fastapi myapp        # scaffold un projet FastAPI async complet
+Fastapi-Database         # configure MySQL, PostgreSQL ou MongoDB
+Fastapi-Email            # branche un service email async (aiosmtplib)
+Fastapi-Upload           # ajoute les uploads de fichiers async
 ```
 
-The aliases are organized into themed modules that load automatically from a single entry point, so only one line needs to be added to your PowerShell profile. Every function ships with comment-based help discoverable through `Get-Help`.
+Les raccourcis sont organisés en modules thématiques chargés automatiquement depuis un **point d'entrée unique** : une seule ligne suffit dans votre profil PowerShell. Chaque fonction dispose d'une aide commentée (`Get-Help`), et la syntaxe est identique à celle de la [version Linux](../README.md#-installation-linux) (`New-Fastapi` ⇄ `new_fastapi`).
 
-## Prerequisites
+---
 
-| Requirement | Details |
-| --- | --- |
-| Operating system | Windows 10 or 11 |
-| Shell | Windows PowerShell 5.1+ or PowerShell 7 |
-| Git | [Git for Windows](https://git-scm.com/download/win) installed and available in `PATH` |
-| Python | Python 3.9+ available in `PATH` (used to scaffold each project) |
+## 🧰 Prérequis
 
-## Installation
+| Exigence | Détail |
+|---|---|
+| **Système** | Windows 10 ou 11 |
+| **Shell** | Windows PowerShell 5.1+ ou PowerShell 7 |
+| **Git** | [Git for Windows](https://git-scm.com/download/win) installé et disponible dans le `PATH` |
+| **Python** | Python 3.9+ disponible dans le `PATH` (utilisé pour scaffolder chaque projet) |
 
-### 1. Copy the module to your config directory
+---
+
+## 📦 Installation
+
+### 1. Copier le module dans votre répertoire de configuration
 
 ```powershell
 New-Item -ItemType Directory -Path "$HOME\.config\alias" -Force
 Copy-Item -Path "windows" -Destination "$HOME\.config\alias\fastapi-aliases-project\" -Recurse
 ```
 
-### 2. Check whether a PowerShell profile exists
+### 2. Vérifier que votre profil PowerShell existe
 
 ```powershell
 Test-Path $PROFILE
 ```
 
-- `True` → your profile already exists; continue to step 4.
-- `False` → create it first:
+- `True` → votre profil existe, passez à l'étape 4.
+- `False` → créez-le :
 
 ```powershell
 New-Item -Path $PROFILE -ItemType File -Force
 ```
 
-### 3. Open your profile
+### 3. Ouvrir votre profil
 
 ```powershell
 notepad $PROFILE
 ```
 
-or with Visual Studio Code:
+ou avec Visual Studio Code :
 
 ```powershell
 code $PROFILE
 ```
 
-### 4. Import the aliases
+### 4. Importer les raccourcis
 
-Append the following line to your profile:
+Ajoutez la ligne suivante à votre profil :
 
 ```powershell
 . "$HOME\.config\alias\fastapi-aliases-project\windows\index.ps1"
 ```
 
-`index.ps1` is the entry point. It dot-sources every module located in its own directory, so the shortcuts work no matter where the project has been copied to.
+`index.ps1` est le point d'entrée. Il source (`dot-source`) chaque module situé dans son propre répertoire, si bien que les raccourcis fonctionnent quel que soit l'endroit où le projet a été copié.
 
-### 5. Reload your profile
+### 5. Recharger votre profil
 
 ```powershell
 . $PROFILE
 ```
 
-## Module reference
+---
 
-Each module groups functions by topic:
+## 🚀 Utilisation
 
-| File | Functions |
-| --- | --- |
-| `create-fastapi-project.ps1` | `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
-| `setup-fastapi-database.ps1` | `Fastapi-Database`, `Setup-Fastapi-Database` |
-| `setup-fastapi-email.ps1` | `Fastapi-Email`, `Setup-Fastapi-Mail` |
-| `setup-fastapi-upload.ps1` | `Fastapi-Upload`, `Setup-Fastapi-Upload` |
-
-## Usage
-
-Aliases behave like ordinary PowerShell commands:
+Les raccourcis se comportent comme des commandes PowerShell natives :
 
 ```powershell
-New-Fastapi myapp        # scaffold a new async FastAPI project
-Fastapi-Database         # choose MySQL, PostgreSQL or MongoDB
-Fastapi-Email            # configure SMTP email sending
-Get-Help New-Fastapi     # show parameters and examples
+New-Fastapi myapp        # scaffold un nouveau projet FastAPI async
+Fastapi-Database         # choisir MySQL, PostgreSQL ou MongoDB
+Fastapi-Email            # configurer l'envoi d'emails SMTP
+Fastapi-Upload           # configurer les uploads async
+Get-Help New-Fastapi     # afficher les paramètres et exemples
 ```
 
-### Project scaffold
+### 📦 Créer un projet
 
 ```powershell
 New-Fastapi myapp
 ```
 
-Creates a virtual environment, installs dependencies, and generates the full async project tree (`app/main.py`, `app/api/v1/...`, `tests/`, `requirements.txt`, `.env`, `.gitignore`).
+Crée un environnement virtuel, installe les dépendances, et génère l'arborescence asynchrone complète (`app/main.py`, `app/api/v1/...`, `tests/`, `requirements.txt`, `.env`, `.gitignore`).
 
-### Database setup
+> 💡 Le nom du projet est optionnel : laissez vide pour le saisir interactivement.
+
+### 🗄️ Configurer la base de données
 
 ```powershell
 Fastapi-Database
 ```
 
-Prompts for MySQL (default), PostgreSQL, or MongoDB. SQLAlchemy setups are generated fully asynchronous (`create_async_engine`, `AsyncSession`, async repositories and endpoints); MongoDB uses `motor`. For MySQL/PostgreSQL an Alembic environment is initialized.
+Propose MySQL (par défaut), PostgreSQL ou MongoDB. Les setups SQLAlchemy sont générés **entièrement asynchrones** (`create_async_engine`, `AsyncSession`, repositories et endpoints async) ; MongoDB utilise `motor`. Pour MySQL/PostgreSQL, un environnement Alembic est initialisé.
 
-### Email setup
+### 📧 Configurer le service email
 
 ```powershell
 Fastapi-Email
 ```
 
-Installs `aiosmtplib` and `Jinja2`, creates the template folders, and generates an async `EmailService` plus the required `MAIL_*` settings.
+Installe `aiosmtplib` et `Jinja2`, crée les dossiers de templates, et génère un `EmailService` asynchrone ainsi que les réglages `MAIL_*` requis.
 
-### File upload setup
+Une **API de test** complète est également générée et enregistrée sous `/email` :
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/v1/email/templates` | Liste les templates HTML disponibles dans `app/templates/emails` |
+| `POST /api/v1/email/preview` | Prévisualise le rendu HTML d'un template avec des données dynamiques |
+| `POST /api/v1/email/send` | Envoie un e-mail réel via `EmailService` (SMTP) |
+
+Avec :
+- `app/schemas/email.py` — `EmailTemplateRead`, `EmailPreviewRequest` (template_name + `data`), `EmailTestRequest` (`to` validé en `EmailStr`, `subject`, `template_name`, `data`)
+- `app/templates/emails/welcome.html` — template d'exemple Jinja2 utilisant `{{ name }}`, `{{ message }}` et `{{ app_name }}`
+
+```powershell
+# Prévisualiser le template welcome
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/email/preview" `
+  -ContentType "application/json" `
+  -Body '{"template_name": "welcome", "data": {"name": "Alice"}}'
+
+# Envoyer un e-mail de test
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/email/send" `
+  -ContentType "application/json" `
+  -Body '{"to": "destinataire@exemple.com", "subject": "Bienvenue !", "template_name": "welcome", "data": {"name": "Alice"}}'
+```
+
+### 📁 Configurer les uploads de fichiers
 
 ```powershell
 Fastapi-Upload
 ```
 
-Installs `python-multipart` and `aiofiles`, creates the storage tree (`app/uploads/images`, `app/uploads/documents`), and generates an async `UploadService` with extension/size validation, schemas, and `POST`/`DELETE` endpoints. Uploaded files are served statically from `/uploads`.
+Installe `python-multipart` et `aiofiles`, crée l'arborescence de stockage (`app/uploads/images`, `app/uploads/documents`), et génère un `UploadService` asynchrone avec validation taille/extension, schemas et endpoints `POST`/`DELETE`. Les fichiers uploadés sont servis statiquement depuis `/uploads`.
 
-## Built-in help
+---
 
-| Command | Description |
-| --- | --- |
-| `Get-Help <function>` | Show comment-based documentation for any alias, including parameters and examples |
+## 📖 Aide intégrée
+
+| Commande | Description |
+|---|---|
+| `Get-Help <fonction>` | Documentation commentée de n'importe quel raccourci (paramètres, exemples) |
 
 ```powershell
 Get-Help New-Fastapi
 Get-Help Fastapi-Database
 ```
 
-## Uninstall
+---
 
-1. Remove the import line from `$PROFILE`.
-2. Delete the directory:
+## 🧹 Désinstallation
+
+1. Supprimez la ligne d'import de `$PROFILE`.
+2. Supprimez le répertoire :
 
 ```powershell
 Remove-Item -Path "$HOME\.config\alias\fastapi-aliases-project" -Recurse -Force
 ```
 
-## Troubleshooting
+---
 
-| Symptom | Fix |
-| --- | --- |
-| Aliases are unavailable | Verify the import path in `$PROFILE`, then reload with `. $PROFILE`. |
-| `❌ python is not recognized` | Install Python 3.9+ and ensure it is available in `PATH`. |
-| Profile not found | Confirm `$PROFILE` exists with `Test-Path $PROFILE`, creating it if necessary. |
+## 🛟 Dépannage
 
-## Contributing
+| Symptôme | Solution |
+|---|---|
+| Les raccourcis sont indisponibles | Vérifiez le chemin d'import dans `$PROFILE`, puis rechargez avec `. $PROFILE`. |
+| `❌ python is not recognized` | Installez Python 3.9+ et assurez-vous qu'il est disponible dans le `PATH`. |
+| Profil introuvable | Vérifiez que `$PROFILE` existe avec `Test-Path $PROFILE`, en le créant si nécessaire. |
 
-See the [repository README](../README.md) for the full project overview, feature set, and contribution guidelines.
+---
+
+## 🤝 Contribution
+
+Voir le [README du dépôt](../README.md#-contribution) pour les consignes de contribution, ou [ouvrir une issue](https://github.com/raharison-joshue-agape/ps-fastapi-aliases/issues).

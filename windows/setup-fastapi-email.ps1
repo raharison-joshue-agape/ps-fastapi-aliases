@@ -88,6 +88,111 @@ $fastapi_email_env_config = @'
 '@
 
 
+$fastapi_email_schemas_content = @'
+from typing import Any
+from pydantic import BaseModel, EmailStr, Field
+
+
+class EmailTemplateRead(BaseModel):
+    name: str
+
+
+class EmailPreviewRequest(BaseModel):
+    template_name: str
+    data: dict[str, Any] = Field(default_factory=dict)
+
+
+class EmailTestRequest(BaseModel):
+    to: EmailStr
+    subject: str
+    template_name: str
+    data: dict[str, Any] = Field(default_factory=dict)
+'@
+
+
+$fastapi_email_endpoint_content = @'
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import HTMLResponse
+
+from app.schemas.email import EmailPreviewRequest, EmailTemplateRead, EmailTestRequest
+from app.services.email_services import EmailService
+
+router = APIRouter()
+
+TEMPLATES_DIR = Path("app/templates/emails")
+
+
+def _list_template_names() -> list[str]:
+    if not TEMPLATES_DIR.is_dir():
+        return []
+    return sorted(p.stem for p in TEMPLATES_DIR.glob("*.html"))
+
+
+@router.get("/templates", response_model=list[EmailTemplateRead])
+async def list_templates():
+    return [{"name": name} for name in _list_template_names()]
+
+
+@router.post("/preview", response_class=HTMLResponse)
+async def preview_template(payload: EmailPreviewRequest):
+    service = EmailService()
+    try:
+        return service.render_template(payload.template_name, payload.data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/send")
+async def send_email(payload: EmailTestRequest):
+    service = EmailService()
+    result = await service.send_email(
+        to=payload.to,
+        subject=payload.subject,
+        template_name=payload.template_name,
+        data=payload.data,
+    )
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("message", "Email sending failed"))
+    return result
+'@
+
+
+$fastapi_email_welcome_template = @'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome, {{ name }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;">
+        <tr>
+            <td align="center" style="padding:40px 16px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;">
+                    <tr>
+                        <td style="background-color:#0ea5e9;padding:32px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:24px;">Welcome, {{ name }}!</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:32px;color:#334155;font-size:15px;line-height:1.6;">
+                            <p style="margin:0 0 16px;">Hello {{ name }},</p>
+                            <p style="margin:0 0 16px;">{{ message | default("Thank you for joining us!") }}</p>
+                            <p style="margin:0;">The {{ app_name | default("FastAPI") }} team</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+'@
+
+
 function Fastapi-Email {
     if (-not (Test-Path "venv")) {
         Write-Host "Creating virtual environment"
@@ -106,11 +211,20 @@ function Fastapi-Email {
 
     $dirs = @(
         "app/templates/emails",
-        "app/services"
+        "app/services",
+        "app/schemas",
+        "app/api/v1/endpoints"
     )
     foreach ($d in $dirs) { if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null } }
 
     Set-Content "app/services/email_services.py" -Value $fastapi_email_service_content -Encoding UTF8
+
+    Set-Content "app/schemas/email.py" -Value $fastapi_email_schemas_content -Encoding UTF8
+    Set-Content "app/api/v1/endpoints/email.py" -Value $fastapi_email_endpoint_content -Encoding UTF8
+    Set-Content "app/templates/emails/welcome.html" -Value $fastapi_email_welcome_template -Encoding UTF8
+
+    Write-Host "Registering email router in app/api/v1/router.py..."
+    fastapi_update_api_router "app/api/v1/router.py" 'api_router.include_router(email.router, prefix="/email", tags=["Email"])' "email"
 
     Write-Host "Updating email configuration in config.py..."
 
