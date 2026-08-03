@@ -56,7 +56,7 @@ Un ensemble de fonctions pour **Bash (Linux/macOS)** et **PowerShell (Windows)**
 | 📁 **Uploads de fichiers** | Service asynchrone (images, documents) avec validation taille/extension et serveur statique `/uploads` |
 | 🧩 **Architecture modulaire** | Modules thématiques (projet, base de données, email, uploads) chargés depuis un point d'entrée unique |
 | 🧠 **Multi-plateforme** | Mêmes commandes, mêmes options, mêmes templates : `new_fastapi` ⇄ `New-Fastapi` |
-| 🍎 **macOS / Bash** | Scripts `.sh` compatibles bash 3.2+ intégré (et zsh) + outils BSD |
+| 🍎 **macOS / Zsh** | Scripts `.zsh` écrits pour zsh (shell par défaut) + outils BSD |
 | ✅ **Feedback clair** | Messages de progression et de succès à chaque étape de l'installation |
 
 ---
@@ -71,8 +71,8 @@ Un ensemble de fonctions pour **Bash (Linux/macOS)** et **PowerShell (Windows)**
 ```
 
 ```bash
-# macOS — ajouter à ~/.zshrc (ou ~/.bash_profile)
-. ~/.config/alias/fastapi-aliases-project/macos/index.sh
+# macOS — ajouter à ~/.zshrc
+. ~/.config/alias/fastapi-aliases-project/macos/index.zsh
 ```
 
 ```powershell
@@ -155,7 +155,6 @@ cp -r macos ~/.config/alias/fastapi-aliases-project/
 
 ```bash
 nano ~/.zshrc          # Zsh (shell par défaut de macOS)
-nano ~/.bash_profile   # Bash
 ```
 
 ### 3. Importer les aliases
@@ -163,13 +162,13 @@ nano ~/.bash_profile   # Bash
 Ajoutez cette ligne à la fin du fichier :
 
 ```bash
-. ~/.config/alias/fastapi-aliases-project/macos/index.sh
+. ~/.config/alias/fastapi-aliases-project/macos/index.zsh
 ```
 
 ### 4. Recharger votre configuration
 
 ```bash
-source ~/.zshrc        # ou : source ~/.bash_profile
+source ~/.zshrc
 ```
 
 ### 5. Créer votre premier projet
@@ -180,7 +179,7 @@ cd myapp && source venv/bin/activate
 uvicorn app.main:app --reload
 ```
 
-> 💡 Les scripts sont compatibles avec le **bash 3.2 embarqué** de macOS (aucune dépendance bash 4+ ni outil GNU) et fonctionnent sous **zsh**.
+> 💡 Les scripts sont écrits en **zsh** (aucune dépendance bash ni outil GNU), uniquement des outils BSD de macOS.
 
 ---
 
@@ -360,14 +359,14 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
       │      (~/.bashrc | ~/.zshrc | $PROFILE)
       ▼
 ┌────────────────────────────┐
-│    index.sh / index.ps1    │  Point d'entrée — charge tous les modules
+│    index.sh / index.zsh / index.ps1  │  Point d'entrée — charge tous les modules
 └────────────┬───────────────┘
              ▼
 ┌────────────────────────────┐
-│  Modules thématiques       │  create-fastapi-project.sh/.ps1
-│                            │  setup-fastapi-database.sh/.ps1
-│                            │  setup-fastapi-email.sh/.ps1
-│                            │  setup-fastapi-upload.sh/.ps1
+│  Modules thématiques       │  create-fastapi-project.sh/.zsh/.ps1
+│                            │  setup-fastapi-database.sh/.zsh/.ps1
+│                            │  setup-fastapi-email.sh/.zsh/.ps1
+│                            │  setup-fastapi-upload.sh/.zsh/.ps1
 └────────────┬───────────────┘
              ▼
 ┌────────────────────────────┐
@@ -379,19 +378,19 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
         (venv + templates générés)
 ```
 
-- **`index.sh` / `index.ps1`** : source l'ensemble des modules situés dans son propre répertoire, quel que soit l'endroit où le projet a été copié.
+- **`index.sh` / `index.zsh` / `index.ps1`** : source l'ensemble des modules situés dans son propre répertoire, quel que soit l'endroit où le projet a été copié.
 - **Modules thématiques** : chacun expose les fonctions publiques d'un domaine (projet, base de données, email, uploads).
 - **Helpers partagés** : portent la logique transversale (mise à jour du router, des `.env`, de la config).
 - Les trois implémentations (`linux/`, `macos/` et `windows/`) sont **fonctionnellement équivalentes** : mêmes commandes, mêmes options, mêmes templates générés.
 
 | Fichier (Linux / macOS / Windows) | Fonctions |
 |---|---|
-| `create-fastapi-project.sh` / `.ps1` | `new_fastapi`, `new_fastapi_project`, `create_fastapi`, `create_fastapi_project` / `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
-| `setup-fastapi-database.sh` / `.ps1` | `fastapi_database`, `setup_fastapi_database` / `Fastapi-Database`, `Setup-Fastapi-Database` |
-| `setup-fastapi-email.sh` / `.ps1` | `fastapi_email`, `setup_fastapi_mail` / `Fastapi-Email`, `Setup-Fastapi-Mail` |
-| `setup-fastapi-upload.sh` / `.ps1` | `fastapi_upload`, `setup_fastapi_upload` / `Fastapi-Upload`, `Setup-Fastapi-Upload` |
+| `create-fastapi-project.sh` / `.zsh` / `.ps1` | `new_fastapi`, `new_fastapi_project`, `create_fastapi`, `create_fastapi_project` / `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
+| `setup-fastapi-database.sh` / `.zsh` / `.ps1` | `fastapi_database`, `setup_fastapi_database` / `Fastapi-Database`, `Setup-Fastapi-Database` |
+| `setup-fastapi-email.sh` / `.zsh` / `.ps1` | `fastapi_email`, `setup_fastapi_mail` / `Fastapi-Email`, `Setup-Fastapi-Mail` |
+| `setup-fastapi-upload.sh` / `.zsh` / `.ps1` | `fastapi_upload`, `setup_fastapi_upload` / `Fastapi-Upload`, `Setup-Fastapi-Upload` |
 
-> 💡 **macOS** expose les **mêmes noms de fonctions que Linux** (scripts `.sh`) — seule l'installation diffère (`~/.zshrc` / `~/.bash_profile`).
+> 💡 **macOS** expose les **mêmes noms de fonctions que Linux** (scripts `.zsh`) — seule l'installation diffère (`~/.zshrc`).
 
 ---
 
@@ -406,12 +405,12 @@ fastapi-aliases-project/
 │   ├── setup-fastapi-email.sh       # fastapi_email (aiosmtplib + Jinja2)
 │   ├── setup-fastapi-upload.sh      # fastapi_upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation Linux
-├── macos/                    # Implémentation Bash pour macOS (zsh/bash 3.2+)
-│   ├── index.sh              # Point d'entrée (charge tous les modules)
-│   ├── create-fastapi-project.sh    # new_fastapi, create_fastapi, ...
-│   ├── setup-fastapi-database.sh    # fastapi_database (SQLAlchemy async / motor)
-│   ├── setup-fastapi-email.sh       # fastapi_email (aiosmtplib + Jinja2)
-│   ├── setup-fastapi-upload.sh      # fastapi_upload (aiofiles + /uploads)
+├── macos/                    # Implémentation Zsh pour macOS
+│   ├── index.zsh             # Point d'entrée (charge tous les modules)
+│   ├── create-fastapi-project.zsh    # new_fastapi, create_fastapi, ...
+│   ├── setup-fastapi-database.zsh    # fastapi_database (SQLAlchemy async / motor)
+│   ├── setup-fastapi-email.zsh       # fastapi_email (aiosmtplib + Jinja2)
+│   ├── setup-fastapi-upload.zsh      # fastapi_upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation macOS
 ├── windows/                  # Implémentation PowerShell pour Windows
 │   ├── index.ps1             # Point d'entrée (charge tous les modules)

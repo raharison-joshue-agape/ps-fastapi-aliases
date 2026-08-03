@@ -1,13 +1,13 @@
-#!/usr/bin/env bash
-# FastAPI file upload setup for macOS (bash).
-# Compatible with the system bash 3.2 and BSD tools shipped with macOS.
+#!/usr/bin/env zsh
+# FastAPI file upload setup for macOS (zsh).
+# Written for zsh (default shell on macOS) with its BSD tools.
 # Mirrors the Windows PowerShell module (setup-fastapi-upload.ps1).
 # Generates an async UploadService (python-multipart + aiofiles), schemas,
 # endpoints, static file serving and storage tree.
 
 if ! type fastapi_update_api_router >/dev/null 2>&1; then
-    # shellcheck source=setup-fastapi-database.sh
-    . "$(dirname "${BASH_SOURCE[0]}")/setup-fastapi-database.sh"
+    # shellcheck source=setup-fastapi-database.zsh
+    . "${0:A:h}/setup-fastapi-database.zsh"
 fi
 
 fastapi_upload_config_block() {

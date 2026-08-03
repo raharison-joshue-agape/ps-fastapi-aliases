@@ -2,12 +2,11 @@
 
 # 🍎 FastAPI Project Aliases — macOS
 
-### Scaffold des projets **FastAPI** asynchrones et complets directement depuis **zsh / bash**
+### Scaffold des projets **FastAPI** asynchrones et complets directement depuis **zsh**
 
 Des fonctions courtes et mémorisables qui remplacent les longues séquences de configuration par une seule commande.
 
-[![Bash](https://img.shields.io/badge/Bash-3.2%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![Zsh](https://img.shields.io/badge/Zsh-ok-CC5333?style=for-the-badge&logo=zsh&logoColor=white)](https://www.zsh.org/)
+[![Zsh](https://img.shields.io/badge/Zsh-5.0%2B-CC5333?style=for-the-badge&logo=zsh&logoColor=white)](https://www.zsh.org/)
 [![macOS](https://img.shields.io/badge/macOS-ready-000000?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -42,7 +41,7 @@ fastapi_upload          # ajoute les uploads de fichiers async
 
 Les raccourcis sont organisés en modules thématiques chargés automatiquement depuis un **point d'entrée unique** : une seule ligne suffit dans votre configuration shell. Chaque fonction suit la même convention de nommage que les [versions Linux](../README.md#-installation-linux) et [Windows](../README.md#-installation-windows) (`new_fastapi` ⇄ `New-Fastapi`).
 
-> 💡 Les scripts sont **compatibles avec le bash 3.2 embarqué de macOS** et ses outils BSD : aucune dépendance à bash 4+ ni aux utilitaires GNU.
+> 💡 Les scripts sont **écrits en zsh** et utilisent les outils BSD de macOS : aucune dépendance à bash 4+ ni aux utilitaires GNU.
 
 ---
 
@@ -51,7 +50,7 @@ Les raccourcis sont organisés en modules thématiques chargés automatiquement 
 | Exigence | Détail |
 |---|---|
 | **Système** | macOS (Catalina et ultérieur recommandé) |
-| **Shell** | zsh (shell par défaut) ou bash 3.2+ |
+| **Shell** | zsh (shell par défaut de macOS) |
 | **Python** | Python 3.9+ avec `venv` disponible — via [Homebrew](https://brew.sh/) (`brew install python`) ou Xcode Command Line Tools |
 | **Git** | Inclus dans Xcode Command Line Tools |
 | **Base de données** *(optionnel)* | Serveur MySQL/MariaDB, PostgreSQL ou MongoDB |
@@ -69,18 +68,18 @@ cp -r macos "$HOME/.config/alias/fastapi-aliases-project/macos"
 
 ### 2. Charger les raccourcis
 
-Ajoutez la ligne suivante à `~/.zshrc` (zsh, shell par défaut de macOS) ou `~/.bash_profile` (bash) :
+Ajoutez la ligne suivante à `~/.zshrc` (zsh, shell par défaut de macOS) :
 
 ```bash
-. "$HOME/.config/alias/fastapi-aliases-project/macos/index.sh"
+. "$HOME/.config/alias/fastapi-aliases-project/macos/index.zsh"
 ```
 
-`index.sh` est le point d'entrée. Il source (`dot-source`) chaque module situé dans son propre répertoire, si bien que les raccourcis fonctionnent quel que soit l'endroit où le projet a été copié.
+`index.zsh` est le point d'entrée. Il source (`dot-source`) chaque module situé dans son propre répertoire, si bien que les raccourcis fonctionnent quel que soit l'endroit où le projet a été copié.
 
 ### 3. Recharger votre shell
 
 ```bash
-source ~/.zshrc         # ou : source ~/.bash_profile
+source ~/.zshrc
 ```
 
 ---
@@ -160,20 +159,20 @@ Installe `python-multipart` et `aiofiles`, crée l'arborescence de stockage (`ap
 
 | Commande | Description |
 |---|---|
-| `type <fonction>` | Affiche la définition du raccourci |
-| `declare -f <fonction>` | Affiche le code source complet de la fonction |
-| `help <fonction>` | Affiche la documentation shell lorsqu'elle existe |
+| `type <fonction>` | Affiche le type de la commande |
+| `functions <fonction>` | Affiche le code source complet de la fonction |
+| `whence -f <fonction>` | Affiche la définition du raccourci |
 
 ```bash
 type new_fastapi
-declare -f fastapi_database
+functions fastapi_database
 ```
 
 ---
 
 ## 🧹 Désinstallation
 
-1. Supprimez la ligne d'import de `~/.zshrc` (ou `~/.bash_profile`).
+1. Supprimez la ligne d'import de `~/.zshrc`.
 2. Supprimez le répertoire :
 
 ```bash
@@ -186,7 +185,7 @@ rm -rf "$HOME/.config/alias/fastapi-aliases-project"
 
 | Symptôme | Solution |
 |---|---|
-| Les raccourcis sont indisponibles | Vérifiez le chemin d'import dans votre configuration shell, puis rechargez avec `source ~/.zshrc` (ou `source ~/.bash_profile`). |
+| Les raccourcis sont indisponibles | Vérifiez le chemin d'import dans votre configuration shell, puis rechargez avec `source ~/.zshrc`. |
 | `zsh: new_fastapi: command not found` | Vérifiez que le module a bien été sourcé (lancez `type new_fastapi`). |
 | `python3: command not found` | Installez Python 3.9+ : `brew install python` (ou activez Xcode Command Line Tools). |
 | `command not found: pip` | Assurez-vous d'être dans l'environnement virtuel activé (`source venv/bin/activate`) avant les commandes `pip`. |

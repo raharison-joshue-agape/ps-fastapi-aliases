@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
-# FastAPI database setup for macOS (bash).
+#!/usr/bin/env zsh
+# FastAPI database setup for macOS (zsh).
 # Mirrors the Windows PowerShell module (setup-fastapi-database.ps1).
-# Compatible with the system bash 3.2 and BSD tools shipped with macOS.
+# Written for zsh (default shell on macOS) with its BSD tools.
 # Generates a fully asynchronous SQLAlchemy stack (create_async_engine,
 # AsyncSession, async repositories/services/endpoints) or async MongoDB (motor).
 
@@ -712,7 +712,7 @@ fastapi_database() {
     echo "1) MySQL/MariaDB"
     echo "2) PostgreSQL"
     echo "3) MongoDB"
-    read -rp "Enter choice (1-3): " db_choice
+    read "db_choice?Enter choice (1-3): "
 
     echo "Upgrading pip"
     python -m pip install --upgrade pip

@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
-# FastAPI email setup for macOS (bash).
-# Compatible with the system bash 3.2 and BSD tools shipped with macOS.
+#!/usr/bin/env zsh
+# FastAPI email setup for macOS (zsh).
+# Written for zsh (default shell on macOS) with its BSD tools.
 # Mirrors the Windows PowerShell module (setup-fastapi-email.ps1).
 # Generates an async EmailService (aiosmtplib) + Jinja2 templates.
 

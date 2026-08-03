@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
-# FastAPI project scaffolding for macOS (bash).
-# Compatible with the system bash 3.2 shipped with macOS.
+#!/usr/bin/env zsh
+# FastAPI project scaffolding for macOS (zsh).
+# Written for zsh, the default shell shipped with macOS.
 # Mirrors the Windows PowerShell module (create-fastapi-project.ps1).
 
 new_fastapi_config() {
@@ -222,7 +222,7 @@ PY_EOF
 new_fastapi() {
     local project_name="${1:-}"
     if [ -z "$project_name" ]; then
-        read -rp "Project name: " project_name
+        read "project_name?Project name: "
     fi
 
     mkdir -p "$project_name" || return 1
@@ -256,7 +256,7 @@ new_fastapi() {
     new_fastapi_env > .env
     new_fastapi_env > .env.example
 
-    read -rp "Would you like to initialize Git? (Y/N): " git_init
+    read "git_init?Would you like to initialize Git? (Y/N): "
     case "$git_init" in
         [Yy]*)
             git init
