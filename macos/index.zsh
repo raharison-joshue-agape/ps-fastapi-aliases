@@ -14,5 +14,7 @@ _FASTAPI_MACOS_DIR="${0:A:h}"
 . "$_FASTAPI_MACOS_DIR/setup-fastapi-database.zsh"
 # shellcheck source=setup-fastapi-email.zsh
 . "$_FASTAPI_MACOS_DIR/setup-fastapi-email.zsh"
+# shellcheck source=setup-fastapi-pdf.zsh
+. "$_FASTAPI_MACOS_DIR/setup-fastapi-pdf.zsh"
 # shellcheck source=setup-fastapi-upload.zsh
 . "$_FASTAPI_MACOS_DIR/setup-fastapi-upload.zsh"

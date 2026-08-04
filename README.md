@@ -53,8 +53,9 @@ Un ensemble de fonctions pour **Bash (Linux/macOS)** et **PowerShell (Windows)**
 | ⚙️ **100 % asynchrone** | `async def` partout : endpoints, `create_async_engine`/`AsyncSession`, `motor`, `aiosmtplib`, `aiofiles` |
 | 🗄️ **Multi-base de données** | MySQL, PostgreSQL (SQLAlchemy async) ou MongoDB (`motor`) au choix, avec Alembic initialisé |
 | 📧 **Service email** | `EmailService` asynchrone avec templates Jinja2, configuration SMTP complète et **API de test dédiée** |
+| 📄 **Génération de PDF** | WeasyPrint (recommandé), ReportLab ou FPDF2 avec templates Jinja2 et **API dédiée** |
 | 📁 **Uploads de fichiers** | Service asynchrone (images, documents) avec validation taille/extension et serveur statique `/uploads` |
-| 🧩 **Architecture modulaire** | Modules thématiques (projet, base de données, email, uploads) chargés depuis un point d'entrée unique |
+| 🧩 **Architecture modulaire** | Modules thématiques (projet, base de données, email, PDF, uploads) chargés depuis un point d'entrée unique |
 | 🧠 **Multi-plateforme** | Mêmes commandes, mêmes options, mêmes templates : `new_fastapi` ⇄ `New-Fastapi` |
 | 🍎 **macOS / Zsh** | Scripts `.zsh` écrits pour zsh (shell par défaut) + outils BSD |
 | ✅ **Feedback clair** | Messages de progression et de succès à chaque étape de l'installation |
@@ -348,6 +349,45 @@ Installe `python-multipart` et `aiofiles`, crée l'arborescence de stockage (`ap
 
 Validation de l'extension (HTTP 415) et de la taille max `MAX_UPLOAD_SIZE` (HTTP 413), nommage par UUID, catégorisation automatique `images/` vs `documents/`, et service statique `/uploads`.
 
+### 📄 Configurer la génération de PDF
+
+```bash
+# Linux / macOS
+fastapi_pdf
+# Windows
+Fastapi-Pdf
+```
+
+Propose le choix entre trois bibliothèques de génération de PDF :
+
+| # | Bibliothèque | Description |
+|---|---|---|
+| 1 | **WeasyPrint** | **[RECOMMANDÉ]** Meilleure conversion HTML/CSS vers PDF, supporte les mises en page complexes, les règles CSS `@page` |
+| 2 | ReportLab | Génération de PDF de bas niveau, contrôle programmatique, pas de support de templates HTML |
+| 3 | FPDF2 | Léger et simple, génération de PDF basique, options de style limitées |
+
+**WeasyPrint est recommandé** car il offre la meilleure expérience pour la conversion HTML vers PDF avec un support complet de CSS.
+
+Une **API de test** complète est générée et enregistrée sous `/pdf` :
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/v1/pdf/generate` | Génère un PDF à partir d'un template Jinja2 |
+| `GET /api/v1/pdf/templates` | Liste les templates HTML disponibles dans `app/templates/pdfs` |
+
+Fichiers générés :
+- `app/services/pdf_service.py` — Service de génération de PDF
+- `app/schemas/pdf.py` — `PDFGenerateRequest` (template_name, data, output_filename)
+- `app/api/v1/endpoints/pdf.py` — Endpoints API
+- `app/templates/pdfs/invoice.html` — Template d'exemple (facture professionnelle)
+
+```bash
+# Générer un PDF à partir du template invoice
+curl -X POST http://127.0.0.1:8000/api/v1/pdf/generate \
+  -H "Content-Type: application/json" \
+  -d '{"template_name": "invoice", "data": {"title": "Facture #001", "from_name": "Mon Entreprise", "to_name": "Client Test", "date": "01/01/2025", "items": [{"description": "Service", "quantity": 1, "unit_price": "100.00", "total": "100.00"}], "subtotal": "100.00", "tax": "20.00", "total": "120.00"}}'
+```
+
 ---
 
 ## 🧩 Architecture et modules
@@ -366,6 +406,7 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
 │  Modules thématiques       │  create-fastapi-project.sh/.zsh/.ps1
 │                            │  setup-fastapi-database.sh/.zsh/.ps1
 │                            │  setup-fastapi-email.sh/.zsh/.ps1
+│                            │  setup-fastapi-pdf.sh/.zsh/.ps1
 │                            │  setup-fastapi-upload.sh/.zsh/.ps1
 └────────────┬───────────────┘
              ▼
@@ -379,7 +420,7 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
 ```
 
 - **`index.sh` / `index.zsh` / `index.ps1`** : source l'ensemble des modules situés dans son propre répertoire, quel que soit l'endroit où le projet a été copié.
-- **Modules thématiques** : chacun expose les fonctions publiques d'un domaine (projet, base de données, email, uploads).
+- **Modules thématiques** : chacun expose les fonctions publiques d'un domaine (projet, base de données, email, PDF, uploads).
 - **Helpers partagés** : portent la logique transversale (mise à jour du router, des `.env`, de la config).
 - Les trois implémentations (`linux/`, `macos/` et `windows/`) sont **fonctionnellement équivalentes** : mêmes commandes, mêmes options, mêmes templates générés.
 
@@ -388,6 +429,7 @@ L'implémentation suit une **architecture modulaire en couches**, chaque couche 
 | `create-fastapi-project.sh` / `.zsh` / `.ps1` | `new_fastapi`, `new_fastapi_project`, `create_fastapi`, `create_fastapi_project` / `New-Fastapi`, `New-Fastapi-Project`, `Create-Fastapi`, `Create-Fastapi-Project` |
 | `setup-fastapi-database.sh` / `.zsh` / `.ps1` | `fastapi_database`, `setup_fastapi_database` / `Fastapi-Database`, `Setup-Fastapi-Database` |
 | `setup-fastapi-email.sh` / `.zsh` / `.ps1` | `fastapi_email`, `setup_fastapi_mail` / `Fastapi-Email`, `Setup-Fastapi-Mail` |
+| `setup-fastapi-pdf.sh` / `.zsh` / `.ps1` | `fastapi_pdf`, `setup_fastapi_pdf` / `Fastapi-Pdf`, `Setup-Fastapi-Pdf` |
 | `setup-fastapi-upload.sh` / `.zsh` / `.ps1` | `fastapi_upload`, `setup_fastapi_upload` / `Fastapi-Upload`, `Setup-Fastapi-Upload` |
 
 > 💡 **macOS** expose les **mêmes noms de fonctions que Linux** (scripts `.zsh`) — seule l'installation diffère (`~/.zshrc`).
@@ -403,6 +445,7 @@ fastapi-aliases-project/
 │   ├── create-fastapi-project.sh    # new_fastapi, create_fastapi, ...
 │   ├── setup-fastapi-database.sh    # fastapi_database (SQLAlchemy async / motor)
 │   ├── setup-fastapi-email.sh       # fastapi_email (aiosmtplib + Jinja2)
+│   ├── setup-fastapi-pdf.sh         # fastapi_pdf (WeasyPrint / ReportLab / FPDF2)
 │   ├── setup-fastapi-upload.sh      # fastapi_upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation Linux
 ├── macos/                    # Implémentation Zsh pour macOS
@@ -410,6 +453,7 @@ fastapi-aliases-project/
 │   ├── create-fastapi-project.zsh    # new_fastapi, create_fastapi, ...
 │   ├── setup-fastapi-database.zsh    # fastapi_database (SQLAlchemy async / motor)
 │   ├── setup-fastapi-email.zsh       # fastapi_email (aiosmtplib + Jinja2)
+│   ├── setup-fastapi-pdf.zsh         # fastapi_pdf (WeasyPrint / ReportLab / FPDF2)
 │   ├── setup-fastapi-upload.zsh      # fastapi_upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation macOS
 ├── windows/                  # Implémentation PowerShell pour Windows
@@ -417,6 +461,7 @@ fastapi-aliases-project/
 │   ├── create-fastapi-project.ps1   # New-Fastapi, Create-Fastapi, ...
 │   ├── setup-fastapi-database.ps1   # Fastapi-Database (SQLAlchemy async / motor)
 │   ├── setup-fastapi-email.ps1      # Fastapi-Email (aiosmtplib + Jinja2)
+│   ├── setup-fastapi-pdf.ps1        # Fastapi-Pdf (WeasyPrint / ReportLab / FPDF2)
 │   ├── setup-fastapi-upload.ps1     # Fastapi-Upload (aiofiles + /uploads)
 │   └── README.md             # Guide d'installation Windows
 └── README.md                 # Ce fichier

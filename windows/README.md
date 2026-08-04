@@ -36,6 +36,7 @@ Au lieu de taper de longues commandes de configuration répétitives, vous utili
 New-Fastapi myapp        # scaffold un projet FastAPI async complet
 Fastapi-Database         # configure MySQL, PostgreSQL ou MongoDB
 Fastapi-Email            # branche un service email async (aiosmtplib)
+Fastapi-Pdf              # ajoute la génération de PDF (WeasyPrint recommandé)
 Fastapi-Upload           # ajoute les uploads de fichiers async
 ```
 
@@ -114,6 +115,7 @@ Les raccourcis se comportent comme des commandes PowerShell natives :
 New-Fastapi myapp        # scaffold un nouveau projet FastAPI async
 Fastapi-Database         # choisir MySQL, PostgreSQL ou MongoDB
 Fastapi-Email            # configurer l'envoi d'emails SMTP
+Fastapi-Pdf              # configurer la génération de PDF
 Fastapi-Upload           # configurer les uploads async
 Get-Help New-Fastapi     # afficher les paramètres et exemples
 ```
@@ -166,6 +168,42 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/email/preview"
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/email/send" `
   -ContentType "application/json" `
   -Body '{"to": "destinataire@exemple.com", "subject": "Bienvenue !", "template_name": "welcome", "data": {"name": "Alice"}}'
+```
+
+### 📄 Configurer la génération de PDF
+
+```powershell
+Fastapi-Pdf
+```
+
+Propose le choix entre trois bibliothèques de génération de PDF :
+
+| # | Bibliothèque | Description |
+|---|---|---|
+| 1 | **WeasyPrint** | **[RECOMMANDÉ]** Meilleure conversion HTML/CSS vers PDF, supporte les mises en page complexes, les règles CSS `@page` |
+| 2 | ReportLab | Génération de PDF de bas niveau, contrôle programmatique, pas de support de templates HTML |
+| 3 | FPDF2 | Léger et simple, génération de PDF basique, options de style limitées |
+
+**WeasyPrint est recommandé** car il offre la meilleure expérience pour la conversion HTML vers PDF avec un support complet de CSS.
+
+Une **API de test** complète est générée et enregistrée sous `/pdf` :
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/v1/pdf/generate` | Génère un PDF à partir d'un template Jinja2 |
+| `GET /api/v1/pdf/templates` | Liste les templates HTML disponibles dans `app/templates/pdfs` |
+
+Fichiers générés :
+- `app/services/pdf_service.py` — Service de génération de PDF
+- `app/schemas/pdf.py` — `PDFGenerateRequest` (template_name, data, output_filename)
+- `app/api/v1/endpoints/pdf.py` — Endpoints API
+- `app/templates/pdfs/invoice.html` — Template d'exemple (facture professionnelle)
+
+```powershell
+# Générer un PDF à partir du template invoice
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/pdf/generate" `
+  -ContentType "application/json" `
+  -Body '{"template_name": "invoice", "data": {"title": "Facture #001", "from_name": "Mon Entreprise", "to_name": "Client Test", "date": "01/01/2025", "items": [{"description": "Service", "quantity": 1, "unit_price": "100.00", "total": "100.00"}], "subtotal": "100.00", "tax": "20.00", "total": "120.00"}}'
 ```
 
 ### 📁 Configurer les uploads de fichiers

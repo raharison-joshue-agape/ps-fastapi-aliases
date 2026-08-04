@@ -14,5 +14,7 @@ _FASTAPI_LINUX_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$_FASTAPI_LINUX_DIR/setup-fastapi-database.sh"
 # shellcheck source=setup-fastapi-email.sh
 . "$_FASTAPI_LINUX_DIR/setup-fastapi-email.sh"
+# shellcheck source=setup-fastapi-pdf.sh
+. "$_FASTAPI_LINUX_DIR/setup-fastapi-pdf.sh"
 # shellcheck source=setup-fastapi-upload.sh
 . "$_FASTAPI_LINUX_DIR/setup-fastapi-upload.sh"
